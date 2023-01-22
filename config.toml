@@ -1,0 +1,9 @@
+# write the config to store a folder for output texts
+[output]
+output_folder = "C:\Users\matth\GitHub\private_ai_chats"
+
+[features]
+# Enabling each will incur another API call
+# preflight_text_correction = false
+# ai_file_titles = false
+verbose = false
