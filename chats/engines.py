@@ -4,6 +4,7 @@ from chats.client_utils import create_client
 
 create_client()
 
+
 def list_engines():
     # list engines
     engines = openai.Engine.list()

@@ -1,6 +1,6 @@
 # write the config to store a folder for output texts
 [output]
-output_folder = "C:\Users\matth\GitHub\private_ai_chats"
+output_folder = "C:\\Users\\matth\\GitHub\\private_ai_chats\\"
 
 [features]
 # Enabling each will incur another API call

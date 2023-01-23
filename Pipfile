@@ -6,8 +6,17 @@ name = "pypi"
 [packages]
 openai = "*"
 python-dotenv = "*"
+mdformat = "*"
+linkcheckmd = "*"
+marko = "*"
+symspellpy = "*"
+
 
 [dev-packages]
+black = "*"
+pytest = "*"
+mypy = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.11"
