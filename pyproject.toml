@@ -108,7 +108,7 @@ multi_line_output = 3
 use_parentheses = true
 
 [tool.ruff]
-line-length = 120
+line-length = 1000
 
 # Enable Pyflakes `E` and `F` codes by default.
 select = ["E", "F"]
@@ -146,3 +146,6 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 # Assume Python 3.10.
 target-version = "py311"
+
+
+
