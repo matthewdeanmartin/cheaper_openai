@@ -1,16 +1,23 @@
 import re
 
 import pkg_resources
-from symspellpy import SymSpell, Verbosity
+try:
+    from symspellpy import SymSpell, Verbosity
+    AVAIL = True
+except ModuleNotFoundError:
+    AVAIL = False
 
-sym_spell = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
-dictionary_path = pkg_resources.resource_filename("symspellpy", "frequency_dictionary_en_82_765.txt")
-# term_index is the column of the term and count_index is the
-# column of the term frequency
-sym_spell.load_dictionary(dictionary_path, term_index=0, count_index=1)
+if AVAIL:
+    sym_spell = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
+    dictionary_path = pkg_resources.resource_filename("symspellpy", "frequency_dictionary_en_82_765.txt")
+    # term_index is the column of the term and count_index is the
+    # column of the term frequency
+    sym_spell.load_dictionary(dictionary_path, term_index=0, count_index=1)
 
 
 def check_document(document: str) -> tuple[bool, str]:
+    if not AVAIL:
+        return True, document
     results = []
     all_right = True
     for word in document.split():

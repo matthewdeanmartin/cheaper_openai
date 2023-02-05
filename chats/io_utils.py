@@ -31,7 +31,7 @@ def dump_response(prompt: str, choices: list[str], file_name: str, folder_path: 
         .replace("'", "")
         .replace('"', "")
     )
-    new_file_name = f"{file_name}_{count}.md"
+    new_file_name = f"t{count}_{file_name}.md"
     full_name = os.path.join(folder_path, new_file_name)
     assert full_name.endswith(".md")
     with open(full_name, "w", encoding="utf-8") as file:

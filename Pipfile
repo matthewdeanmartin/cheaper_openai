@@ -10,7 +10,8 @@ mdformat = "*"
 linkcheckmd = "*"
 marko = "*"
 symspellpy = "*"
-
+tiktoken = "*"
+transformers = "*"
 
 [dev-packages]
 black = "*"
