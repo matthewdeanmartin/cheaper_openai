@@ -10,6 +10,8 @@ from chats.spelling_utils import check_document
 config = read_config()
 create_client()
 
+TOC_PROMPT = """Create a table of contents for a book named 'Powershell for Linux Users' The output should be in yaml"""
+
 
 def run() -> None:
     # get output folder from config file
@@ -36,7 +38,6 @@ def run() -> None:
         else:
             exit()
 
-
     is_code = False
 
     for temperature in [
@@ -59,6 +60,7 @@ def run() -> None:
                 args["max_tokens"] = 4000 - prompt_tokens
 
             response = openai.Completion.create(**args)
+
             choices = list(x["text"] for x in response["choices"])
             file_name = create_name(response["choices"][0]["text"])
             dump_response(prompt, choices, file_name, output_folder)
