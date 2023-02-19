@@ -1,5 +1,6 @@
 import time
 
+import marko
 import openai
 import yaml
 
@@ -26,19 +27,58 @@ e.g.
 It should not have anything about the Registry because Linux doesn't have a Windows Registry."""
 
 
+def fulfill_the_promise():
+    # get output folder from config file
+    # output_folder = config["output"]["output_folder"]
+    # prompt = read_prompt(output_folder)
+
+    markdown_document = """
+    # title
+
+    ## subtitle first
+
+    paragraph
+
+    ## subtitle last
+
+    paragraph one.
+
+    paragraph two.
+    """
+
+    tree = marko.parse(markdown_document)
+
+    # Find the last subtitle node in the tree
+    last_subtitle = None
+    for node in tree.children:
+        if node.tag_name == "h2":
+            last_subtitle = node
+
+    # Extract the markdown under the last subtitle
+    markdown_text = ""
+    for node in last_subtitle.children:
+        markdown_text += node.markdown
+
+    return markdown_text
+
+
 def make_the_toc() -> None:
     # get output folder from config file
     output_folder = config["output"]["output_folder"]
 
     prompt = read_prompt(output_folder)
-    # prompt = cleanup_markdown(prompt)
+
+    who_are_you = (
+        "You are professional software developer and build master. You are enthusiastically "
+        "teaching people how to use the fish shell, version 3.2."
+    )
 
     temperature = 0.9
-    max_tokens = 250
+    max_tokens = 4000
     response = basic_request(max_tokens, prompt, temperature)
 
     choices = list(x["text"] for x in response["choices"])
-    dump_response(prompt, choices, "book.yml", output_folder)
+    dump_response(f"{who_are_you} \n\n {prompt}", choices, "book.yml", output_folder)
 
     likely_yaml = "".join(choices)
     yaml.safe_load(likely_yaml)
@@ -67,7 +107,7 @@ def run_the_toc():
                 prompt = f"{who_are_you} Please write the exposition for '{section} : {chapter}'. Use markdown."
                 response = basic_request(max_tokens, prompt, temperature, sleep=5)
                 choices = list(x["text"] for x in response["choices"])
-                dump_response(prompt, choices, f"{section}_{chapter_count}", output_folder)
+                dump_response(f"{section} : {chapter}", choices, f"{section}_{chapter_count}", output_folder)
 
                 prompt = (
                     f"{who_are_you} Please write code samples for '{section} : {chapter}'. "
@@ -96,4 +136,4 @@ def basic_request(max_tokens, prompt, temperature, sleep=0):
 
 
 if __name__ == "__main__":
-    run_the_toc()
+    make_the_toc()

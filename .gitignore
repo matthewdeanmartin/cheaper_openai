@@ -132,3 +132,4 @@ dmypy.json
 *.md
 !README.md
 .idea/
+/.ruff_cache/

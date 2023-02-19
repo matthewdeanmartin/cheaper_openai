@@ -1,3 +1,5 @@
+import sys
+
 import openai
 
 from chats.client_utils import create_client
@@ -30,7 +32,7 @@ def run() -> None:
         if keep.lower() == "y":
             pass
         else:
-            exit()
+            sys.exit()
 
     is_code = False
 

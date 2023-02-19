@@ -18,6 +18,7 @@ black = "*"
 pytest = "*"
 mypy = "*"
 pre-commit = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.11"

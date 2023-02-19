@@ -1,8 +1,10 @@
 import re
 
 import pkg_resources
+
 try:
     from symspellpy import SymSpell, Verbosity
+
     AVAIL = True
 except ModuleNotFoundError:
     AVAIL = False
@@ -43,8 +45,7 @@ def check_spelling(input_term: str):
         results.append(suggestion.term)
     if len(suggestions) == 0:
         return f"{input_term} !!!(no suggestion)"
-    else:
-        return f"{input_term} !!!({','.join(results)})"
+    return f"{input_term} !!!({','.join(results)})"
 
 
 if __name__ == "__main__":

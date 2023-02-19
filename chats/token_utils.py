@@ -7,11 +7,6 @@ def count_tokens(prompt):
     # cl100k_base 	text-embedding-ada-002
     enc = tiktoken.get_encoding("p50k_base")
     tokens = enc.encode(prompt)
-    print(len(tokens))
+    # print(len(tokens))
     prompt_tokens = len(tokens)
     return prompt_tokens
-
-
-def permitted_tokens(prompt, maximum):
-    if maximum > 4000:
-        maximum = 4000
