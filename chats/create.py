@@ -1,4 +1,6 @@
 import sys
+import os
+os.environ["OPENAI_API_BASE"]= "https://api.openai.com/v1/chat"
 
 import openai
 
@@ -36,17 +38,24 @@ def run() -> None:
 
     is_code = False
 
+    model_max_tokens ={
+        "text-davinci-003": 4000,
+        "curie": 2049,
+        "gpt-3.5-turbo-0301":4000
+    }
+    model_name = "gpt-3.5-turbo-0301"
     for temperature in [
         0.9,
     ]:
         for max_tokens in [
-            4000,
+            model_max_tokens[model_name],
         ]:
             args = {
-                "model": "text-davinci-003",
-                "prompt": prompt,
+                "model": model_name,
+                # "prompt": prompt,
+                "messages": [{"role": "user", "content": prompt}],
                 "temperature": temperature,
-                "max_tokens": max_tokens - prompt_tokens,
+                "max_tokens": max_tokens - prompt_tokens - 15,
                 "top_p": 1,
                 "frequency_penalty": 0,
                 "presence_penalty": 0,
@@ -56,9 +65,12 @@ def run() -> None:
                 args["max_tokens"] = 4000 - prompt_tokens
 
             response = openai.Completion.create(**args)
-
-            choices = list(x["text"] for x in response["choices"])
-            file_name = create_name(response["choices"][0]["text"])
+            if model_name == "gpt-3.5-turbo-0301":
+                choices = list(x["message"]["content"] for x in response["choices"])
+                file_name = create_name(choices[0],model_name)
+            else:
+                choices = list(x["text"] for x in response["choices"])
+                file_name = create_name(response["choices"][0]["text"],model_name)
             dump_response(prompt, choices, file_name, output_folder)
 
 

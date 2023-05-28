@@ -1,0 +1,33 @@
+- Introduction:
+  - What is file system?
+  - Why use Python for file system tasks?
+  - Overview of the book
+
+- Setting up the environment:
+  - Installing Python
+  - Installing required libraries
+
+- Understanding file system operations:
+  - Reading files
+  - Writing files
+  - Copying files
+  - Moving files
+  - Deleting files
+
+- Advanced file system tasks:
+  - Searching for files
+  - Comparing files
+  - Archiving files
+  - Working with directories
+  - Handling file permissions
+
+- Common use cases:
+  - Renaming files in bulk
+  - Sorting files based on attributes
+  - Automating file transfer over FTP
+  - Generating file reports
+
+- Conclusion:
+  - Recap of the key concepts
+  - Additional resources
+  - Final thoughts

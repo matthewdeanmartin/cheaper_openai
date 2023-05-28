@@ -12,3 +12,6 @@ def list_engines():
     # print the first engine's id
     for engine in engines.data:
         print(engine["id"])
+
+if __name__ == '__main__':
+    list_engines()
