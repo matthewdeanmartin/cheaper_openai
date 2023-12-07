@@ -1,3 +1,4 @@
-if __name__ == '__main__':
+if __name__ == "__main__":
     import nltk
-    nltk.download('punkt')
+
+    nltk.download("punkt")

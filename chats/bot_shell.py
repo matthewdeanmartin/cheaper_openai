@@ -1,22 +1,22 @@
 """
 Code for AI
 """
-import time
-from typing import Optional, Any, List
-
 import json
+import time
+from typing import Any, List, Optional
+
+import untruncate_json
 from openai import AsyncOpenAI
 from openai.types.beta import Assistant, Thread, ThreadDeleted
 from openai.types.beta.threads import Run, ThreadMessage, run_create_params
 
 from chats.tool_code.pypi_info import PyPIChecker
 from chats.tool_code.text_shorteners import count_tokens, readability_scores, word_count
-import untruncate_json
-from chats.utils import show_json, write_json_to_logs, SetEncoder
+from chats.utils import SetEncoder, write_json_to_logs
 
 
 class Bot:
-    def __init__(self, assistant_id: str = None, model:str="gpt-3.5-turbo"):
+    def __init__(self, assistant_id: str = None, model: str = "gpt-3.5-turbo"):
         self.client = AsyncOpenAI()
         self.model = model
 
@@ -40,12 +40,12 @@ class Bot:
             name=bot_name,
             instructions=instructions,
             # model="gpt-4-1106-preview", EXPENSIVE
-            model=self.model  # Cheap and smart enough
+            model=self.model,  # Cheap and smart enough
         )
         write_json_to_logs(self.assistant, "assistant")
         return self.assistant
 
-    async def update_instructions(self, instuctions:str):
+    async def update_instructions(self, instuctions: str):
         assistant = await self.client.beta.assistants.update(
             self.assistant.id,
             instructions=instuctions,
@@ -61,7 +61,7 @@ class Bot:
         self.assistant = assistant
         return assistant
 
-    async def enable_file(self, file_ids:list[str]):
+    async def enable_file(self, file_ids: list[str]):
         """Upload one file"""
         # Update Assistant
         assistant = await self.client.beta.assistants.update(
@@ -75,7 +75,7 @@ class Bot:
 
 
 class BotConversation:
-    def __init__(self, assistant: Assistant, thread:Optional[Thread]=None):
+    def __init__(self, assistant: Assistant, thread: Optional[Thread] = None):
         self.client = AsyncOpenAI()
         self.model = "gpt-3.5-turbo"
         self.assistant: Assistant = assistant
@@ -85,6 +85,7 @@ class BotConversation:
             self.thread_id = thread.id
         else:
             self.thread_id = None
+
     async def populate_thread(self) -> Thread:
         """Refresh the thread object from remote store"""
         self.thread = await self.client.beta.threads.retrieve(thread_id=self.thread_id)
@@ -106,8 +107,7 @@ class BotConversation:
         self.thread_id = None
         return result
 
-
-    async def create_run(self, tools:Optional[List[run_create_params.Tool]]=None) -> Run:
+    async def create_run(self, tools: Optional[List[run_create_params.Tool]] = None) -> Run:
         """This is a request to chatbot where the chatbot might make some call backs before
         responding with the final new message"""
         run = await self.client.beta.threads.runs.create(
@@ -118,7 +118,7 @@ class BotConversation:
         write_json_to_logs(run, "run")
         return run
 
-    async def poll_the_run(self, run: Run, tool:Optional[str]=None) -> Run:
+    async def poll_the_run(self, run: Run, tool: Optional[str] = None) -> Run:
         """Handle polling.
 
         TODO: Need pointers to the tool handlers!
@@ -165,13 +165,10 @@ class BotConversation:
     async def check_run(self, run: Run) -> Run:
         """This is a request to chatbot where the chatbot might make some call backs before
         responding with the final new message"""
-        run = await self.client.beta.threads.runs.retrieve(
-            thread_id=self.thread_id,
-            run_id=run.id
-        )
+        run = await self.client.beta.threads.runs.retrieve(thread_id=self.thread_id, run_id=run.id)
         return run
 
-    async def add_user_message(self, content: str)->ThreadMessage:
+    async def add_user_message(self, content: str) -> ThreadMessage:
         """Add a persistent message. Messages persist 30 days, same as thread"""
         message = await self.client.beta.threads.messages.create(
             thread_id=self.thread_id,
@@ -185,7 +182,7 @@ class BotConversation:
         write_json_to_logs(messages, "messages")
         return messages
 
-    async def display_most_recent_bot_message(self)->Optional[Any]:
+    async def display_most_recent_bot_message(self) -> Optional[Any]:
         messages = await self.client.beta.threads.messages.list(thread_id=self.thread_id, order="desc")
         # all_messages = []
         async for message in messages:
@@ -205,7 +202,7 @@ class BotConversation:
                 arguments = json.loads(args_text)
             except json.decoder.JSONDecodeError:
                 print("Truncated json!")
-                arguments = json.loads( untruncate_json.complete(args_text))
+                arguments = json.loads(untruncate_json.complete(args_text))
 
             print(arguments)
             print(name)
@@ -230,9 +227,9 @@ class BotConversation:
             print(result)
             print("-----")
             tool_result = {
-                    "tool_call_id": tool_call.id,
-                    "output": json.dumps(result, cls=SetEncoder),
-                }
+                "tool_call_id": tool_call.id,
+                "output": json.dumps(result, cls=SetEncoder),
+            }
             write_json_to_logs(tool_call, f"tool_call_{name}")
             write_json_to_logs(result, f"tool_result_{name}")
 

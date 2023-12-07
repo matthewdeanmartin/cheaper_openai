@@ -8,9 +8,12 @@ from openai import AsyncOpenAI
 from openai._base_client import AsyncPaginator
 from openai.pagination import AsyncPage
 from openai.types import FileObject
+
 from chats.utils import write_json_to_logs
 
 dotenv.load_dotenv()
+
+
 class AIFileSystem:
     def __init__(self, assistant_id: str = None):
         self.client = AsyncOpenAI()
@@ -52,11 +55,14 @@ class AIFileSystem:
         return result
 
     # TODO retrieve contents
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
+
     async def main():
         fs = AIFileSystem()
 
-        for key, value in await  fs.list():
+        for key, value in await fs.list():
             if key == "data":
                 for file in value:
                     print(file.id)

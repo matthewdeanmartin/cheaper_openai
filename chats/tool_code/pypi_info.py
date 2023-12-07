@@ -1,10 +1,10 @@
+import asyncio
 import string
 from copy import copy
 
 import httpx
-import asyncio
-from stdlib_list import stdlib_list
 import inflect
+from stdlib_list import stdlib_list
 
 from chats.tool_code.text_shorteners import convert_md_to_text
 
@@ -42,8 +42,9 @@ class PyPIChecker:
                                         return response.text
             return ""
 
-    async def describe_packages(self, package_list: list[str],
-                                truncate_description_at: int = 1000) -> dict[str, dict[str, str]]:
+    async def describe_packages(
+        self, package_list: list[str], truncate_description_at: int = 1000
+    ) -> dict[str, dict[str, str]]:
         """Asynchronously get some descriptive info about packages."""
         async with httpx.AsyncClient() as client:
             tasks = [client.get(f"{self.base_url}/{package_name}/json") for package_name in package_list]
@@ -87,9 +88,7 @@ class PyPIChecker:
         package_list = [package_name.lower() for package_name in package_list]
 
         # need to track variants
-        package_info = {
-            name: {"variants": set(), "available": False} for name in package_list
-        }
+        package_info = {name: {"variants": set(), "available": False} for name in package_list}
 
         engine = inflect.engine()
 
@@ -98,7 +97,7 @@ class PyPIChecker:
         singulars = set()
         for package_name in set(list(package_list)):
             # depuctuate
-            cleaned = package_name.translate(str.maketrans('', '', string.punctuation))
+            cleaned = package_name.translate(str.maketrans("", "", string.punctuation))
             # Convert to lower case
             depuctuated.add(cleaned.lower())
             package_info[package_name]["variants"].add(cleaned.lower())
@@ -142,16 +141,16 @@ class PyPIChecker:
         # If one variant is taken, name is not available.
         for package_name, info in package_info.items():
             # results shows if taken (not available) so we reverse it.
-            availability_of_variants = [not results_as_dict[variant] for variant in info["variants"] if
-                                        variant in results_as_dict]
+            availability_of_variants = [
+                not results_as_dict[variant] for variant in info["variants"] if variant in results_as_dict
+            ]
             info["available"] = all(availability_of_variants)
 
         return package_info
 
     def check_if_in_any(self, package_name: str) -> bool:
         """Check if a package name is in a list of package names."""
-        for version in ["2.6", "2.7", "3.2", "3.3",
-                        "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]:
+        for version in ["2.6", "2.7", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]:
             if package_name in stdlib_list(version):
                 return True
         return False
@@ -165,24 +164,25 @@ class PyPIChecker:
 
     def is_valid_string(self, package_name: str):
         """Check if a package name is a valid string."""
-        invalid = ["requirements",
-                   "requirements.txt",
-                   "package_name",
-                   "<package_name>",
-                   "package-name",
-                   "<package-name>"]
+        invalid = [
+            "requirements",
+            "requirements.txt",
+            "package_name",
+            "<package_name>",
+            "package-name",
+            "<package-name>",
+        ]
 
-        return isinstance(package_name, str) and len(package_name) > 0 and not package_name in invalid
+        return isinstance(package_name, str) and len(package_name) > 0 and package_name not in invalid
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Asynchronous function to use the PyPIChecker
 
     async def main():
         checker = PyPIChecker()
         results = await checker.describe_packages(["faker", "names", "pandas"])
         print(results)
-
 
     async def check_exists():
         checker = PyPIChecker()
@@ -196,13 +196,12 @@ if __name__ == '__main__':
             "CommonMark",
             "MarkdownPP",
             "markdownify",
-            "mistep"
+            "mistep",
         ]
         results = await checker.packages_exist(to_check)
         print(results)
 
         # package_list = ['numpy', 'friends', 'oxen', 'pandas', "goose", 'nonexistentpackage']
-
 
     async def variants():
         checker = PyPIChecker()
@@ -224,7 +223,6 @@ if __name__ == '__main__':
             print(f"Does {package} exist? {exists}")
         checker.check_if_in_any("nope_no_way_not_at_all")
         checker.check_if_in_any("io")
-
 
     # Run the asynchronous function
     asyncio.run(main())

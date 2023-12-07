@@ -5,7 +5,7 @@ import openai
 import yaml
 
 from chats.ai_utils.client_utils import create_client
-from chats.ai_utils.io_utils import read_config, read_prompt, dump_response, read_yaml_toc_prompt
+from chats.ai_utils.io_utils import dump_response, read_config, read_prompt, read_yaml_toc_prompt
 from chats.ai_utils.token_utils import count_tokens
 
 config = read_config()
@@ -85,11 +85,7 @@ def make_the_toc() -> None:
 
     temperature = 0.9
     max_tokens = 4000
-    response = basic_request(
-        max_tokens=max_tokens,
-        prompt=TEMPLATE,
-        who_are_you=WHO_ARE_YOU,
-        temperature=temperature)
+    response = basic_request(max_tokens=max_tokens, prompt=TEMPLATE, who_are_you=WHO_ARE_YOU, temperature=temperature)
 
     choices = choices_from_response(response)
     dump_response(f"{WHO_ARE_YOU} \n\n {prompt}", choices, "book.yml", output_folder)
@@ -119,7 +115,7 @@ def run_the_toc():
                 chapter_count += 1
 
                 prompt = f"Please write the exposition for '{section} : {chapter}'. Use markdown."
-                response = basic_request(max_tokens, prompt,WHO_ARE_YOU, temperature, sleep=5)
+                response = basic_request(max_tokens, prompt, WHO_ARE_YOU, temperature, sleep=5)
                 choices = choices_from_response(response)
                 dump_response(f"{section} : {chapter}", choices, f"{section}_{chapter_count}", output_folder)
 
@@ -127,7 +123,7 @@ def run_the_toc():
                     f"Please write code samples for '{section} : {chapter}'. "
                     f"Use markdown and code blocks for code. All examples *must* use characters, scenes, quotes from the Doctor Dolittle series by Hugh Lofting as example material. Be creative and playful."
                 )
-                response = basic_request(max_tokens,WHO_ARE_YOU, prompt, temperature, sleep=5)
+                response = basic_request(max_tokens, WHO_ARE_YOU, prompt, temperature, sleep=5)
                 choices = choices_from_response(response)
                 dump_response(f"{section} : {chapter}", choices, f"{section}_{chapter_count}_examples", output_folder)
 
@@ -137,7 +133,7 @@ def basic_request(max_tokens, prompt, who_are_you, temperature, sleep=0):
     print(prompt)
     time.sleep(sleep)
     messages = [
-        {"role": "system", "content": who_are_you },
+        {"role": "system", "content": who_are_you},
         {"role": "user", "content": prompt},
         # {"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
         # {"role": "user", "content": "Where was it played?"}

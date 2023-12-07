@@ -4,6 +4,7 @@ One off functions
 import json
 import os
 from typing import Any
+
 import markpickle
 from pydantic import BaseModel
 
@@ -29,7 +30,7 @@ def write_json_to_logs(obj, kind: str):
             markpickle.dump(obj, md_file)
 
 
-def show_json(obj:BaseModel):
+def show_json(obj: BaseModel):
     """Dump a pydantic model"""
     dictified = obj.model_dump()
     map_of_dict = obj.model_dump()
@@ -43,7 +44,7 @@ def format_pydantic_value(model_instance: BaseModel) -> str:
     """MessageContentText"""
     md_content = f"# {model_instance.__class__.__name__} Instance\n\n"
     dictified = model_instance.model_dump()
-    for field_name, model_field in dictified.items(): # model_instance.__class__.model_fields.items():
+    for field_name, model_field in dictified.items():  # model_instance.__class__.model_fields.items():
         # value = getattr(model_instance, field_name)
         value = model_field
         if value:
@@ -54,9 +55,9 @@ def format_pydantic_value(model_instance: BaseModel) -> str:
 
 def format_value(value: Any) -> str:
     if isinstance(value, (list, tuple)):
-        return ', '.join(format_value(item) for item in value)
+        return ", ".join(format_value(item) for item in value)
     elif isinstance(value, dict):
-        return ', '.join(f"{k}: {format_value(v)}" for k, v in value.items())
+        return ", ".join(f"{k}: {format_value(v)}" for k, v in value.items())
     elif isinstance(value, BaseModel):
         return format_pydantic_value(value)
     else:
@@ -72,7 +73,7 @@ def pydantic_model_to_pretty_md(model_instance: BaseModel, file_name: str):
             formatted_value = format_value(value)
             md_content += f"- **{field_name}**: {formatted_value}\n"
 
-    with open(file_name, 'w', encoding="utf-8", errors="backslashreplace") as md_file:
+    with open(file_name, "w", encoding="utf-8", errors="backslashreplace") as md_file:
         md_file.write(md_content)
 
 

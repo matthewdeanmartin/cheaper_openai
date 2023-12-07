@@ -9,23 +9,18 @@ Pypi Name Judge Bot - evaluates names
 import asyncio
 import traceback
 
-import time
-
 import dotenv
 from openai.types import FunctionDefinition
-from openai.types.beta.threads import run_create_params
 from openai.types.beta.threads.run import ToolAssistantToolsFunction
 
-from chats.bot_shell import BotConversation
 from chats.bots import get_persistent_bot, get_persistent_bot_convo
 from chats.chatroom import ChatroomLog
-from chats.utils import show_json
 
 dotenv.load_dotenv()
 
 if __name__ == "__main__":
-    async def main():
 
+    async def main():
         instructions = """You suggest two to ten pypi packages for people who describe what they need.
 - Package should exist and support python 3, as far as we know.
 - If we can't think of any, it is okay to say there are not any.
@@ -36,9 +31,8 @@ Polars and Pandas are good packages for dataframes.
 1. polars
 2. pandas
 """
-        name_bot = await get_persistent_bot("Pypi Package Suggestion Bot",
-                                            instructions,"gpt-3.5-turbo")
-        current_assistant = await name_bot.update_instructions(instructions)
+        name_bot = await get_persistent_bot("Pypi Package Suggestion Bot", instructions, "gpt-3.5-turbo")
+        await name_bot.update_instructions(instructions)
 
         # TODO: UI thing to pick a thread/start new thread
         thread_id = ""
@@ -50,8 +44,9 @@ Polars and Pandas are good packages for dataframes.
             judge_instructions = """
             You judge pypi packages for appropriateness to a users needs. 
             Appropriate packages match the users needs and also exist on pypi."""
-            judge_bot = await get_persistent_bot("Pypi package appropriateness judge",
-                                                 judge_instructions,"gpt-3.5-turbo")
+            judge_bot = await get_persistent_bot(
+                "Pypi package appropriateness judge", judge_instructions, "gpt-3.5-turbo"
+            )
 
             # TODO: Way to track judge thread via chat room, user doesn't specify thread, it has to come from chatroom.
             judge_thread_id = ""
@@ -84,9 +79,11 @@ Polars and Pandas are good packages for dataframes.
             ideas = bots_ideas_message.content[0].text.value
             print(ideas)
             # "- The project name must not be  too similar to an existing project and may be confusable. " \
-            for_judgement = f"A developer said: `{package_description}`.\n" \
-                            f"These are the suggested packages: ```ideas\n\n{ideas}```\n\n" \
-                            f"What do you think, are these real, are they apt to the task? Please use tools to check for package existence and description."
+            for_judgement = (
+                f"A developer said: `{package_description}`.\n"
+                f"These are the suggested packages: ```ideas\n\n{ideas}```\n\n"
+                f"What do you think, are these real, are they apt to the task? Please use tools to check for package existence and description."
+            )
             print(for_judgement)
             instructions_for_judge = await judge_convo.add_user_message(for_judgement)
 
@@ -109,7 +106,7 @@ Polars and Pandas are good packages for dataframes.
                             "required": ["package_names"],
                         },
                     ),
-                    type="function"
+                    type="function",
                 ),
                 ToolAssistantToolsFunction(
                     function=FunctionDefinition(
@@ -129,9 +126,8 @@ Polars and Pandas are good packages for dataframes.
                             "required": ["package_names"],
                         },
                     ),
-                    type="function"
+                    type="function",
                 ),
-
             ]
 
             # Submit user req to agent. Run may involve bot asking to use `functions`
@@ -143,8 +139,6 @@ Polars and Pandas are good packages for dataframes.
         except Exception as ex:
             chatroom.add_python_exception(ex, traceback.format_exc())
             raise
-
-
 
     # Python 3.7+
     asyncio.run(main())

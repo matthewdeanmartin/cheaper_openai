@@ -1,8 +1,8 @@
 import tiktoken
 from markdown_it import MarkdownIt
 from mdit_plain.renderer import RendererPlain
-from readability import Readability
 from nltk.tokenize import RegexpTokenizer
+from readability import Readability
 from readability.exceptions import ReadabilityException
 
 
@@ -10,7 +10,8 @@ def convert_md_to_text(md_data: str) -> str:
     parser = MarkdownIt(renderer_cls=RendererPlain)
     return parser.render(md_data)
 
-def count_tokens(text:str)->int:
+
+def count_tokens(text: str) -> int:
     """Count the number of tokens in a string."""
     # gpt3 turbo - cl100k_base
     # gpt2 (or r50k_base) 	Most GPT-3 models
@@ -23,27 +24,28 @@ def count_tokens(text:str)->int:
     return token_count
 
 
-def word_count(text:str)->int:
+def word_count(text: str) -> int:
     """Count the number of tokens in a string."""
-    tokenizer = RegexpTokenizer(r'\w+')
+    tokenizer = RegexpTokenizer(r"\w+")
     tokens = tokenizer.tokenize(text)
     return len(tokens)
 
-def readability_scores(text:str)->dict[str, float]:
+
+def readability_scores(text: str) -> dict[str, float]:
     """Calculate readability scores for a string."""
     r = Readability(text)
     try:
-        flesch_kincaid = round(r.flesch_kincaid().score,1)
+        flesch_kincaid = round(r.flesch_kincaid().score, 1)
     except ReadabilityException:
         flesch_kincaid = "N/A - low word count"
 
     try:
-        gunning_fog = round(r.gunning_fog().score,1)
+        gunning_fog = round(r.gunning_fog().score, 1)
     except ReadabilityException:
         gunning_fog = "N/A - low word count"
 
     try:
-        coleman_liau = round(r.coleman_liau().score,1)
+        coleman_liau = round(r.coleman_liau().score, 1)
     except ReadabilityException:
         coleman_liau = "N/A - low word count"
 
@@ -51,7 +53,7 @@ def readability_scores(text:str)->dict[str, float]:
         "flesch_kincaid": flesch_kincaid,
         # "flesch": r.flesch(),
         "gunning_fog": gunning_fog,
-        "coleman_liau": coleman_liau
+        "coleman_liau": coleman_liau,
     }
     # r.coleman_liau()
     # r.dale_chall()
@@ -616,7 +618,7 @@ Rising waters won’t stop the project, said Lari. She has plans for future vill
 
 “If I could find a way to spread it everywhere — if I could go cluster by cluster, hub by hub, I want to do it that way.”
 """
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(count_tokens(LOTS_OF_TEXT))
     print(readability_scores(LOTS_OF_TEXT))
     print(word_count(LOTS_OF_TEXT))

@@ -31,36 +31,33 @@ Concerns
 No file system modification
 
 """
+import fnmatch
+import glob
 import os
+import re
+import time
+from io import StringIO
+from itertools import islice
+from pathlib import Path
 from typing import Optional
 
+import python_minifier
 import tiktoken
-import time
 
 # grep the code
 
 #
 
-from pathlib import Path
-from itertools import islice
-from io import StringIO
-import re
-import glob
-import os
-import fnmatch
-import python_minifier
-import os
 
 
-def tree(dir_path: Path, level: int = -1, limit_to_directories: bool = False,
-         length_limit: int = 1000):
+def tree(dir_path: Path, level: int = -1, limit_to_directories: bool = False, length_limit: int = 1000):
     """Given a directory Path object print a visual tree structure
     Credits: https://stackoverflow.com/a/59109706/33264
     """
-    space = '    '
-    branch = '│   '
-    tee = '├── '
-    last = '└── '
+    space = "    "
+    branch = "│   "
+    tee = "├── "
+    last = "└── "
 
     dir_path = Path(dir_path)  # accept string coerceable to Path
     files = 0
@@ -68,7 +65,7 @@ def tree(dir_path: Path, level: int = -1, limit_to_directories: bool = False,
 
     result = ""
 
-    def inner(dir_path: Path, prefix: str = '', level=-1):
+    def inner(dir_path: Path, prefix: str = "", level=-1):
         nonlocal files, directories
         if not level:
             return  # 0, stop iterating
@@ -92,12 +89,12 @@ def tree(dir_path: Path, level: int = -1, limit_to_directories: bool = False,
     for line in islice(iterator, length_limit):
         result += line + "\n"
     if next(iterator, None):
-        result += f'... length_limit, {length_limit}, reached, counted:' + "\n"
-    result += f'\n{directories} directories' + (f', {files} files' if files else '') + "\n"
+        result += f"... length_limit, {length_limit}, reached, counted:" + "\n"
+    result += f"\n{directories} directories" + (f", {files} files" if files else "") + "\n"
     return result
 
 
-def is_python_file(file:str)->bool:
+def is_python_file(file: str) -> bool:
     return file.endswith(".py")
 
 
@@ -106,7 +103,7 @@ def format_path_as_header(path):
 
 
 def read_file_contents(file_path):
-    with open(file_path, 'r', encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         return file.read()
 
 
@@ -125,9 +122,9 @@ def format_code_as_markdown(base_path: str, output_file: str, header: str) -> No
                 full_path = os.path.join(root, file)
                 relative_path = os.path.relpath(full_path, base_path)
                 markdown_content += format_path_as_header(relative_path)
-                markdown_content += '```python\n'
+                markdown_content += "```python\n"
                 markdown_content += read_file_contents(full_path)
-                markdown_content += '\n```\n\n'
+                markdown_content += "\n```\n\n"
     write_or_append(markdown_content, output_file)
 
 
@@ -138,8 +135,6 @@ def write_or_append(markdown_content, output_file):
         mode = "w"
     with open(output_file, mode, encoding="utf-8") as md_file:
         md_file.write(markdown_content)
-
-
 
 
 def is_file_in_root_folder(file_path: str, root_folder: str) -> bool:
@@ -167,9 +162,7 @@ def remove_root_folder(file_path: str, root_folder: str) -> str:
     return os.path.relpath(absolute_file_path, absolute_root_folder)
 
 
-
-
-def is_ignored_by_gitignore(file_path: str, gitignore_path: str = '.gitignore') -> bool:
+def is_ignored_by_gitignore(file_path: str, gitignore_path: str = ".gitignore") -> bool:
     """
     Check if a file is ignored by .gitignore.
 
@@ -186,11 +179,11 @@ def is_ignored_by_gitignore(file_path: str, gitignore_path: str = '.gitignore') 
     # Normalize file path
     file_path = os.path.abspath(file_path)
 
-    with open(gitignore_path, 'r') as gitignore:
+    with open(gitignore_path) as gitignore:
         for line in gitignore:
             line = line.strip()
             # Skip empty lines and comments
-            if not line or line.startswith('#'):
+            if not line or line.startswith("#"):
                 continue
 
             # Convert the .gitignore pattern to a glob pattern
@@ -201,6 +194,7 @@ def is_ignored_by_gitignore(file_path: str, gitignore_path: str = '.gitignore') 
 
     return False
 
+
 import ast
 
 
@@ -209,11 +203,7 @@ class SandBoxedShell:
         self.root_folder = root_folder
         self.token_model = "gpt-3.5-turbo"
 
-
-    def grep(self, regex: str,
-             glob_pattern: str,
-             skip_first_matches: int = -1,
-             maximum_matches: int = -1):
+    def grep(self, regex: str, glob_pattern: str, skip_first_matches: int = -1, maximum_matches: int = -1):
         """
         Search for lines matching a regular expression in files specified by a glob pattern.
 
@@ -224,7 +214,7 @@ class SandBoxedShell:
         matches = 0
         skip_count = 0 if skip_first_matches < 0 else skip_first_matches
         for filename in glob.glob(glob_pattern):
-            with open(filename, 'r') as file:
+            with open(filename) as file:
                 if not is_file_in_root_folder(filename, self.root_folder):
                     continue
                 line_number = 0
@@ -237,8 +227,10 @@ class SandBoxedShell:
                             if (skip_first_matches > 0 and matches > skip_first_matches) or skip_first_matches == -1:
                                 minimal_filename = remove_root_folder(filename, root_folder)
                                 print(f"{minimal_filename}: line {line_number}: {line.strip()}")
-        print(f"{matches} matches found and {matches if matches <= maximum_matches else maximum_matches} displayed. "
-              f"Skipped {skip_first_matches}")
+        print(
+            f"{matches} matches found and {matches if matches <= maximum_matches else maximum_matches} displayed. "
+            f"Skipped {skip_first_matches}"
+        )
 
     def count_tokens(self, text: str) -> int:
         """Count the number of tokens in a string."""
@@ -252,14 +244,17 @@ class SandBoxedShell:
         tokens = encoding.encode(text)
         token_count = len(tokens)
         return token_count
-    def cat(self,
-            file_paths: list[str],
-            number_lines:bool=True,
-            show_ends:bool=False,
-            squeeze_blank:bool=True,
-            show_tabs:bool=False,
-            minify_py:bool=False,
-            as_ast:bool=False)->None:
+
+    def cat(
+        self,
+        file_paths: list[str],
+        number_lines: bool = True,
+        show_ends: bool = False,
+        squeeze_blank: bool = True,
+        show_tabs: bool = False,
+        minify_py: bool = False,
+        as_ast: bool = False,
+    ) -> None:
         """
         Mimics the basic functionalities of the 'cat' command in Unix.
 
@@ -286,7 +281,7 @@ class SandBoxedShell:
                     with StringIO(file_text) as file:
                         self.process_cat_file(file, line_number, number_lines, show_ends, show_tabs, squeeze_blank)
                 else:
-                    with open(file_path, 'rb') as file:
+                    with open(file_path, "rb") as file:
                         self.process_cat_file(file, line_number, number_lines, show_ends, show_tabs, squeeze_blank)
             except FileNotFoundError:
                 print(f"python_cat: {file_path}: No such file or directory")
@@ -298,36 +293,36 @@ class SandBoxedShell:
         skip = False
         for line in file:
             if isinstance(line, bytes):
-                line_text = line.decode('utf-8')  # Decode bytes to string
+                line_text = line.decode("utf-8")  # Decode bytes to string
             else:
                 line_text = line
-            if was_blank and line_text in ('\r\n', '\n'):
+            if was_blank and line_text in ("\r\n", "\n"):
                 skip = True
                 print(line_text)
 
-            if line_text not in ('\r\n', '\n'):
+            if line_text not in ("\r\n", "\n"):
                 # never skip a line with text
                 skip = False
 
             if not skip or not squeeze_blank:
                 if show_ends:
-                    if line_text.endswith('\r\n'):
-                        line_text = line_text.replace('\r\n', '^M$\n')
-                    elif line_text.endswith('\n'):
-                        line_text = line_text.replace('\n', '$\n')
+                    if line_text.endswith("\r\n"):
+                        line_text = line_text.replace("\r\n", "^M$\n")
+                    elif line_text.endswith("\n"):
+                        line_text = line_text.replace("\n", "$\n")
                 if show_tabs:
-                    line_text = line_text.replace('\t', '^I')
+                    line_text = line_text.replace("\t", "^I")
 
                 if number_lines:
-                    print(f"{line_number}\t", end='')
+                    print(f"{line_number}\t", end="")
 
-                if line_text.endswith('\r\n'):
+                if line_text.endswith("\r\n"):
                     # save some tokens.
-                    line_text = line_text.replace('\r\n', "\n")
-                print(line_text, end='')
+                    line_text = line_text.replace("\r\n", "\n")
+                print(line_text, end="")
 
                 line_number += 1
-            was_blank = line_text in ('\r\n', '\n')
+            was_blank = line_text in ("\r\n", "\n")
 
     def find_files(self, pattern: str) -> list[str]:
         """
@@ -355,7 +350,7 @@ class SandBoxedShell:
         for line in self.head_tail(file_path, lines, "tail"):
             print(line)
 
-    def head_tail(self, file_path: str, lines: int = 10, mode: str = 'head') -> list[str]:
+    def head_tail(self, file_path: str, lines: int = 10, mode: str = "head") -> list[str]:
         """
         Read lines from the start ('head') or end ('tail') of a file.
 
@@ -367,17 +362,17 @@ class SandBoxedShell:
         Returns:
             List[str]: A list of the requested lines from the file.
         """
-        if mode not in ['head', 'tail']:
+        if mode not in ["head", "tail"]:
             raise ValueError("Mode must be 'head' or 'tail'")
 
         if is_file_in_root_folder(file_path, self.root_folder):
-            with open(file_path, 'r') as file:
-                if mode == 'head':
+            with open(file_path) as file:
+                if mode == "head":
                     return [next(file) for _ in range(lines)]
                 else:  # mode == 'tail'
                     return list(file)[-lines:]
 
-    def ls(self, path: Optional[str] = '.', all: bool = False, long: bool = False) -> list[str]:
+    def ls(self, path: Optional[str] = ".", all: bool = False, long: bool = False) -> list[str]:
         """
         List directory contents, with options to include all files and detailed view.
 
@@ -389,7 +384,7 @@ class SandBoxedShell:
         Returns:
             List[str]: List of files and directories, optionally with details.
         """
-        entries = os.listdir(path) if all else [entry for entry in os.listdir(path) if not entry.startswith('.')]
+        entries = os.listdir(path) if all else [entry for entry in os.listdir(path) if not entry.startswith(".")]
         entries_info = []
 
         for entry in entries:
@@ -409,25 +404,31 @@ class SandBoxedShell:
         return entries_info
 
 
-import markpickle
 import inspect
-def get_source(module_path:str, function_name:str)->str:
+
+import markpickle
+
+
+def get_source(module_path: str, function_name: str) -> str:
     """Takes file system path to module and name of function as string, Return source code"""
     # TODO: use importlib to import markpickle from "e:/github/src/"
     return inspect.getsource(markpickle.split_file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     a = SandBoxedShell("E:/github/")
     # a.ls("E:/github/untruncate_json")
 
-    a.cat(["E:/github/untruncate_json/untruncate_json/untrunc.py",
-           # "E:/github/untruncate_json/pyproject.toml"
-           ],
-          number_lines=True,
-          show_ends=False,
-          squeeze_blank=True,
-          as_ast=False)
+    a.cat(
+        [
+            "E:/github/untruncate_json/untruncate_json/untrunc.py",
+            # "E:/github/untruncate_json/pyproject.toml"
+        ],
+        number_lines=True,
+        show_ends=False,
+        squeeze_blank=True,
+        as_ast=False,
+    )
     # print(get_source("a"))
     # grep_like_function("\\bdef\\b|\\bclass\\b",
     #                    "e:/github/markpickle/docs/../**/*.py",

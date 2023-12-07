@@ -2,7 +2,7 @@ import os
 import sys
 
 from chats.ai_utils.client_utils import create_client
-from chats.ai_utils.io_utils import read_config, read_prompt, dump_response
+from chats.ai_utils.io_utils import dump_response, read_config, read_prompt
 from chats.ai_utils.token_utils import count_tokens
 from chats.md_utils.markdown_utils import cleanup_markdown
 from chats.preprompt.spelling_utils import check_document
@@ -11,8 +11,6 @@ from chats.workflow.name_this_cheap import create_name
 os.environ["OPENAI_API_BASE"] = "https://api.openai.com/v1/chat"
 
 import openai
-
-
 
 config = read_config()
 create_client()

@@ -10,7 +10,7 @@ def list_engines():
     engines = openai.Engine.list()
 
     # print the first engine's id
-    for engine in sorted(engines.data,key=lambda engine: engine["id"]):
+    for engine in sorted(engines.data, key=lambda engine: engine["id"]):
         print(engine["id"])
 
 

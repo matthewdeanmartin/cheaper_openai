@@ -13,10 +13,8 @@ text
 
 Response from bot
 """
-import traceback
 from typing import Optional
 
-from openai.types.beta.thread_create_params import Message
 from openai.types.beta.threads import ThreadMessage
 
 from chats.bot_shell import Bot
@@ -34,32 +32,23 @@ class ChatroomLog:
     def write_header(self, main_bot: Bot) -> None:
         with open(self.filename, "a", encoding="utf-8", errors="backslashreplace") as f:
             f.write(f"# {self.name}\n\n")
-            f.write(f"## {main_bot.assistant.name} ({main_bot.model}):\n"
-                    f"{main_bot.assistant.instructions}\n\n")
+            f.write(f"## {main_bot.assistant.name} ({main_bot.model}):\n" f"{main_bot.assistant.instructions}\n\n")
 
     def add_starting_user_message(self, message: ThreadMessage):
         self.messages.append(message)
         with open(self.filename, "a", encoding="utf-8", errors="backslashreplace") as f:
             f.write(f"## User:\n{message.content[0].text.value}\n\n")
 
-    def add_bot_message(self,
-                        bot: Bot,
-                        message: ThreadMessage,
-                        message_to_bot: Optional[ThreadMessage] = None):
+    def add_bot_message(self, bot: Bot, message: ThreadMessage, message_to_bot: Optional[ThreadMessage] = None):
         self.messages.append(message)
         with open(self.filename, "a", encoding="utf-8", errors="backslashreplace") as f:
             if message_to_bot:
                 prompt = f"({message_to_bot.content[0].text.value})\n\n"
             else:
                 prompt = ""
-            f.write(f"\n## {bot.assistant.name}:\n"
-                    f"{prompt}"
-                    f"\n{message.content[0].text.value}\n")
+            f.write(f"\n## {bot.assistant.name}:\n" f"{prompt}" f"\n{message.content[0].text.value}\n")
 
     def add_python_exception(self, exception: Exception, message: str):
-
         self.messages.append(message)
         with open(self.filename, "a", encoding="utf-8", errors="backslashreplace") as f:
-            f.write(f"## Exception:\n"
-                    f"{exception}\n"
-                    f"{message}\n\n")
+            f.write(f"## Exception:\n" f"{exception}\n" f"{message}\n\n")

@@ -5,20 +5,13 @@ Python build script bot.
 import asyncio
 import traceback
 
-import openai
-import time
-
 import dotenv
-from openai.types import FunctionDefinition
-from openai.types.beta.threads import run_create_params
-from openai.types.beta.threads.run import ToolAssistantToolsFunction, ToolAssistantToolsRetrieval
+import openai
+from openai.types.beta.threads.run import ToolAssistantToolsRetrieval
 
 from chats.ai_filesystem import AIFileSystem
-from chats.bot_shell import BotConversation
 from chats.bots import get_persistent_bot, get_persistent_bot_convo
 from chats.chatroom import ChatroomLog
-from chats.tool_code.text_shorteners import count_tokens, readability_scores, LOTS_OF_TEXT
-from chats.utils import show_json
 
 dotenv.load_dotenv()
 
@@ -27,7 +20,7 @@ def get_python_files(base_path):
     import os
 
     def clean_path(path):
-        return path.replace('\\', '/')
+        return path.replace("\\", "/")
 
     def is_python_file(file):
         return file.endswith(".py")
@@ -37,14 +30,15 @@ def get_python_files(base_path):
         for file in files:
             if is_python_file(file):
                 full_path = os.path.join(root, file)
-                short_path = full_path.replace(base_path, '').lstrip(os.sep)
+                short_path = full_path.replace(base_path, "").lstrip(os.sep)
                 clean_full_path = clean_path(full_path)
                 clean_short_path = clean_path(short_path)
                 python_files[clean_full_path] = clean_short_path
 
     return python_files
 
-async def upload_all_files(path)->str:
+
+async def upload_all_files(path) -> str:
     python_files = get_python_files("E:/github/untruncate_json")
     ai_file_system = AIFileSystem()
     for path, file_name in python_files.items():
@@ -52,12 +46,8 @@ async def upload_all_files(path)->str:
             try:
                 # Skip empties.
                 the_bytes = contents.read()
-                if len(the_bytes)>0:
-                    results = await ai_file_system.create(
-                        file_name,
-                        the_bytes,
-                        "py"
-                    )
+                if len(the_bytes) > 0:
+                    results = await ai_file_system.create(file_name, the_bytes, "py")
                     print(results)
             except openai.BadRequestError as bad:
                 print(bad)
@@ -65,11 +55,11 @@ async def upload_all_files(path)->str:
 
     exit()
 
-async def review_code(path)->str:
 
+async def review_code(path) -> str:
     # Just get all the files
     fs = AIFileSystem()
-    file_ids=[]
+    file_ids = []
     files = []
     for key, value in await fs.list():
         if key == "data":
@@ -78,12 +68,13 @@ async def review_code(path)->str:
                 file_ids.append(file.id)
 
     instructions = """You review python code."""
-    review_bot = await get_persistent_bot(bot_name="Python Code Review bot 3",
-                                         bot_instructions=instructions,
-                                          # Needs to be retrieval capable.
-                                          # 'gpt-4-1106-preview',
-                                          model='gpt-3.5-turbo-1106'
-                                          )
+    review_bot = await get_persistent_bot(
+        bot_name="Python Code Review bot 3",
+        bot_instructions=instructions,
+        # Needs to be retrieval capable.
+        # 'gpt-4-1106-preview',
+        model="gpt-3.5-turbo-1106",
+    )
     if False:
         # already done
         await review_bot.enable_file(file_ids)
@@ -94,9 +85,7 @@ async def review_code(path)->str:
     chatroom.write_header(review_bot)
 
     tools = [
-        ToolAssistantToolsRetrieval(
-            type="retrieval"
-        ),
+        ToolAssistantToolsRetrieval(type="retrieval"),
         # CLI tools? Maybe the "report" style?
         # complexity, etc.
     ]
@@ -105,8 +94,10 @@ async def review_code(path)->str:
     #                   f"First recap it in pseudo code.\n" \
     #                   f"What do you think the code is for?\n" \
     #                   f"Next look for possible bugs.\n"
-    initial_message = f"Review the code in file-XrIZj1ddVDwzFPU2Z2WvWTUG\n" \
-                      f"Do you see any functions here that could be written better, please show me the refactor. Thanks!"
+    initial_message = (
+        "Review the code in file-XrIZj1ddVDwzFPU2Z2WvWTUG\n"
+        "Do you see any functions here that could be written better, please show me the refactor. Thanks!"
+    )
     print(initial_message)
     start_message = await review_convo.add_user_message(initial_message)
     chatroom.add_starting_user_message(start_message)
@@ -121,7 +112,6 @@ async def review_code(path)->str:
     print(final_message_text)
     input("continue?")
     try:
-
         for file in files:
             if "main" in file.filename:
                 continue
@@ -130,9 +120,11 @@ async def review_code(path)->str:
             if "init" in file.filename:
                 continue
             print(f"Working on {file}")
-            initial_message = f" There should be a handful " \
-                              f"of python files. Please look at the file `{file.filename}` " \
-                              f"and provide suggestions for improvement."
+            initial_message = (
+                f" There should be a handful "
+                f"of python files. Please look at the file `{file.filename}` "
+                f"and provide suggestions for improvement."
+            )
             start_message = await review_convo.add_user_message(initial_message)
             chatroom.add_starting_user_message(start_message)
 
@@ -144,17 +136,15 @@ async def review_code(path)->str:
 
             final_message_text = final_message.content[0].text.value
             print(final_message_text)
-            if input("continue?")!="y":
+            if input("continue?") != "y":
                 break
     except Exception as ex:
         chatroom.add_python_exception(ex, traceback.format_exc())
         print("Failed!")
         raise
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     # Python 3.7+
-    asyncio.run(review_code(
-        "E:/github/untruncate_json"
-    ))
+    asyncio.run(review_code("E:/github/untruncate_json"))
     print("Done!")

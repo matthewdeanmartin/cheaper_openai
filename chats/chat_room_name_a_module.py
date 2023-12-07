@@ -9,30 +9,24 @@ Pypi Name Judge Bot - evaluates names
 import asyncio
 import traceback
 
-import time
-
 import dotenv
 from openai.types import FunctionDefinition
-from openai.types.beta.threads import run_create_params
 from openai.types.beta.threads.run import ToolAssistantToolsFunction
 
-from chats.bot_shell import BotConversation
 from chats.bots import get_persistent_bot, get_persistent_bot_convo
 from chats.chatroom import ChatroomLog
-from chats.utils import show_json
 
 dotenv.load_dotenv()
 
 if __name__ == "__main__":
-    async def main():
 
+    async def main():
         instructions = """You help people pick python package names based on how they describe their package.
 - Names should describe the purpose of the package.
 - Names should be concise.
 If not specified, you'll think up 10. Please answer in a list, e.g. [\n'requests',\n'pandas'\n]
 """
-        name_bot = await get_persistent_bot("Pypi Name Bot",
-                                            instructions)
+        name_bot = await get_persistent_bot("Pypi Name Bot", instructions)
 
         # TODO: UI thing to pick a thread/start new thread
         thread_id = ""
@@ -41,10 +35,11 @@ If not specified, you'll think up 10. Please answer in a list, e.g. [\n'requests
         chatroom = ChatroomLog("Pypi Name Bot", name_convo.thread_id)
         try:
             chatroom.write_header(name_bot)
-            judge_instrunctions = "Starting with a description of a python package and some names, " \
-                                  "you judge if they are good names, pick the best and give some reasons."
-            judge_bot = await get_persistent_bot("Pypi Name Judge Bot",
-                                                 judge_instrunctions)
+            judge_instrunctions = (
+                "Starting with a description of a python package and some names, "
+                "you judge if they are good names, pick the best and give some reasons."
+            )
+            judge_bot = await get_persistent_bot("Pypi Name Judge Bot", judge_instrunctions)
 
             # TODO: Way to track judge thread via chat room, user doesn't specify thread, it has to come from chatroom.
             judge_thread_id = ""
@@ -66,9 +61,11 @@ If not specified, you'll think up 10. Please answer in a list, e.g. [\n'requests
             ideas = bots_ideas_message.content[0].text.value
             print(ideas)
             # "- The project name must not be  too similar to an existing project and may be confusable. " \
-            for_judgement = f"The package description: `{package_description}`.\n" \
-                            f"These are the ideas: ```ideas\n{ideas}```\n\n" \
-                            f"What do you think? Please use tools to check for package existence. We can't reuse names."
+            for_judgement = (
+                f"The package description: `{package_description}`.\n"
+                f"These are the ideas: ```ideas\n{ideas}```\n\n"
+                f"What do you think? Please use tools to check for package existence. We can't reuse names."
+            )
             print(for_judgement)
             instructions_for_judge = await judge_convo.add_user_message(for_judgement)
 
@@ -91,7 +88,7 @@ If not specified, you'll think up 10. Please answer in a list, e.g. [\n'requests
                             "required": ["package_names"],
                         },
                     ),
-                    type="function"
+                    type="function",
                 ),
                 ToolAssistantToolsFunction(
                     function=FunctionDefinition(
@@ -111,9 +108,8 @@ If not specified, you'll think up 10. Please answer in a list, e.g. [\n'requests
                             "required": ["package_names"],
                         },
                     ),
-                    type="function"
+                    type="function",
                 ),
-
             ]
 
             # Submit user req to agent. Run may involve bot asking to use `functions`
@@ -125,8 +121,6 @@ If not specified, you'll think up 10. Please answer in a list, e.g. [\n'requests
         except Exception as ex:
             chatroom.add_python_exception(ex, traceback.format_exc())
             raise
-
-
 
     # Python 3.7+
     asyncio.run(main())
