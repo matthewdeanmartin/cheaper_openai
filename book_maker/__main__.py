@@ -1,4 +1,5 @@
 import yaml
+
 with open("data.yml", encoding="utf-8") as data:
     toc = yaml.safe_load(data)
 
