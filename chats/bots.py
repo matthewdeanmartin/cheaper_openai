@@ -11,14 +11,32 @@ from chats.bot_shell import Bot, BotConversation
 
 
 async def get_persistent_bot(bot_name: str, bot_instructions: str, model: str):
+    """
+    Get a bot that will persist across sessions.
+
+    Args:
+        bot_name(str): The name of the bot.
+        bot_instructions(str): The instructions for the bot.
+        model(str): The model to use for the bot.
+
+    Returns:
+        A bot that will persist across sessions.
+    """
     bot_pickle_file_name = bot_name.replace(" ", "_").lower()
     file_path = os.path.join(os.path.dirname(__file__), f"{bot_pickle_file_name}.pkl")
 
     if os.path.exists(file_path):
-        with open(file_path, "rb") as bot_file:
-            unpickled_bot_data = pickle.load(bot_file)
-            name_bot = Bot(assistant_id=unpickled_bot_data.id, model=model)
-            await name_bot.populate_assistant()
+        try:
+            with open(file_path, "rb") as bot_file:
+                unpickled_bot_data = pickle.load(bot_file)
+                name_bot = Bot(assistant_id=unpickled_bot_data.id, model=model)
+                await name_bot.populate_assistant()
+        except KeyError:
+            name_bot = Bot(model=model)
+            await name_bot.create_assistant(bot_name, bot_instructions)
+            with open(file_path, "wb") as bot_file:
+                pickle.dump(name_bot.assistant, bot_file)
+
     else:
         name_bot = Bot(model=model)
         await name_bot.create_assistant(bot_name, bot_instructions)

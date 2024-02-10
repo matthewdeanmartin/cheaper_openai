@@ -54,8 +54,19 @@ Polars and Pandas are good packages for dataframes.
 
             # User's first prompt in a request-response pattern
             # package_description = "I need a package that tells me if a package name is actually module in the stdlib of python."
-            package_description = "I want to write a bunch of functions that either interface with grep, or do the same thing that grep does, i.e. search files and folders for text in a variety of ways."
-
+            # package_description = "I want to write a bunch of functions that either interface with grep, or do the same thing that grep does, i.e. search files and folders for text in a variety of ways."
+            # package_description = "I need to convert the methods of a python class to jsonschema. I'd hope that there is a library to do this for me."
+            # package_description = "I need to convert the function args of a plain python class's methods to jsonschema. pytojsonschema is close but it only handles free-standing functions. marshmallow will not work for me."
+            package_description = "I need a *python* text editor that works like ed or edlin. It needs to be installable from pypi. Not blessed and not prompt-toolkit. Thanks!"
+            package_description = (
+                "I need a python library that can manage TODO tasks in a plain text file. Any prior art for that?"
+            )
+            package_description = "I need a python library that lints google docstrings."
+            package_description = (
+                "I need a python library that checks if all the cli tools I need are "
+                "installed and checks if they match a minimum "
+                "version number. For example, I need pylint, ruff and broot and dua, each at version 1.0.0 or higher."
+            )
             print(package_description)
             start_message = await name_convo.add_user_message(package_description)
             chatroom.add_starting_user_message(start_message)

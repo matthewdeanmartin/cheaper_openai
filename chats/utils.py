@@ -67,8 +67,8 @@ def format_value(value: Any) -> str:
 def pydantic_model_to_pretty_md(model_instance: BaseModel, file_name: str):
     md_content = f"# {model_instance.__class__.__name__} Instance\n\n"
 
-    for field_name, model_field in model_instance.__class__.model_fields.items():
-        value = getattr(model_instance, field_name)
+    for field_name, value in model_instance.dict().items():
+        # value = getattr(model_instance, field_name)
         if value:
             formatted_value = format_value(value)
             md_content += f"- **{field_name}**: {formatted_value}\n"

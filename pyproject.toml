@@ -45,6 +45,8 @@ transformers = ">=4.29.2"
 untruncate-json = "^1.0.0"
 tiktoken = ">=0.4.0"
 
+ai_shell = ">=1.0.3"
+
 # Prompt processing
 html2text = "^2020.1.16"
 

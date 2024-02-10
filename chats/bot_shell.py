@@ -149,7 +149,7 @@ class BotConversation:
                 write_json_to_logs(run, f"run_poll_{run.status}{tool_tag}")
                 exit()
             elif run.status == "expired":
-                print("Some sort of time out")
+                print("Took too long for us to reply with the output of a function/tool")
                 write_json_to_logs(run, f"run_poll_{run.status}{tool_tag}")
                 exit()
             elif run.status == "requires_action":

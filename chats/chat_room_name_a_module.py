@@ -26,7 +26,7 @@ if __name__ == "__main__":
 - Names should be concise.
 If not specified, you'll think up 10. Please answer in a list, e.g. [\n'requests',\n'pandas'\n]
 """
-        name_bot = await get_persistent_bot("Pypi Name Bot", instructions)
+        name_bot = await get_persistent_bot("Pypi Name Bot", instructions, "gpt-3.5-turbo")
 
         # TODO: UI thing to pick a thread/start new thread
         thread_id = ""
@@ -39,14 +39,16 @@ If not specified, you'll think up 10. Please answer in a list, e.g. [\n'requests
                 "Starting with a description of a python package and some names, "
                 "you judge if they are good names, pick the best and give some reasons."
             )
-            judge_bot = await get_persistent_bot("Pypi Name Judge Bot", judge_instrunctions)
+            judge_bot = await get_persistent_bot("Pypi Name Judge Bot", judge_instrunctions, "gpt-3.5-turbo")
 
             # TODO: Way to track judge thread via chat room, user doesn't specify thread, it has to come from chatroom.
             judge_thread_id = ""
             judge_convo = await get_persistent_bot_convo(judge_bot, judge_thread_id)
 
             # User's first prompt in a request-response pattern
-            package_description = "A python package will spell check prompts before users submit them to an AI chatbot."
+            # package_description = "A python package will spell check prompts before users submit them to an AI chatbot."
+            # package_description = "A python package will read in a list of cli tools and minimum version numbers. It will the report if each tool is available, and if it is available within the version number range."
+            package_description = "A python package that will use llms to re-annotate python files so they can be used with cython or mypyc. The name should be creative. It should not start with py or end with py."
 
             print(package_description)
             start_message = await name_convo.add_user_message(package_description)
